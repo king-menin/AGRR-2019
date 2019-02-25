@@ -1,11 +1,5 @@
-### Sorry, we are in developing. In the end of this mounth we will do release. 
-
-# PyTorch solution of NER task with Google AI's BERT model
-## 0. Introduction
-
-This repository contains solution of NER task based on PyTorch [reimplementation](https://github.com/huggingface/pytorch-pretrained-BERT) of [Google's TensorFlow repository for the BERT model](https://github.com/google-research/bert) that was released together with the paper [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805) by Jacob Devlin, Ming-Wei Chang, Kenton Lee and Kristina Toutanova.
-
-This implementation can load any pre-trained TensorFlow checkpoint for BERT (in particular [Google's pre-trained models](https://github.com/google-research/bert)) and a conversion script is provided (see below).
+# Solution of AGRR-2019 (full annotation task)
+# Instructions
 
 ## 1. Loading a TensorFlow checkpoint (e.g. [Google's pre-trained models](https://github.com/google-research/bert#pre-trained-models))
 
@@ -30,70 +24,11 @@ python3 convert_tf_checkpoint_to_pytorch.py \
 
 You can download Google's pre-trained models for the conversion [here](https://github.com/google-research/bert#pre-trained-models).
 
-There is used the [BERT-Base, Multilingual](https://storage.googleapis.com/bert_models/2018_11_03/multilingual_L-12_H-768_A-12.zip) and [BERT-Cased, Multilingual](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) (recommended) in this solution.
+There is used the [BERT-Cased, Multilingual](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) (recommended) in this solution.
 
-## 2. Results
-We didn't search best parametres and obtained the following results for no more than <b>10 epochs</b>.
+## 2. Installation, requirements, test
 
-### Only NER models
-#### Model: `BertBiLSTMAttnCRF`.
-
-| Dataset | Lang | IOB precision | Span precision | Total spans in test set | Notebook
-|-|-|-|-|-|-|
-| [FactRuEval](https://github.com/dialogue-evaluation/factRuEval-2016) | ru | <b>0.937</b> | <b>0.883</b> | 4 | [factrueval.ipynb](examples/factrueval.ipynb)
-| [Atis](https://github.com/Microsoft/CNTK/tree/master/Examples/LanguageUnderstanding/ATIS/Data) | en | 0.852 | 0.787 | 65 | [conll-2003.ipynb](examples/conll-2003.ipynb)
-| [Conll-2003](https://github.com/kyzhouhzau/BERT-NER/tree/master/NERdata) | en | <b>0.945</b> | 0.858 | 5 | [atis.ipynb](examples/atis.ipynb)
-
-* Factrueval (f1): 0.9163±0.006, best **0.926**.
-* Atis (f1): 0.882±0.02, best **0.896**
-* Conll-2003 (f1, dev): 0.949±0.002, best **0.951**; 0.892 (f1, test).
-
-#### Model: `BertBiLSTMAttnNMT`.
-
-| Dataset | Lang | IOB precision | Span precision | Total spans in test set | Notebook
-|-|-|-|-|-|-|
-| [FactRuEval](https://github.com/dialogue-evaluation/factRuEval-2016) | ru | 0.925 | 0.827 | 4 | [factrueval-nmt.ipynb](examples/factrueval-nmt.ipynb)
-| [Atis](https://github.com/Microsoft/CNTK/tree/master/Examples/LanguageUnderstanding/ATIS/Data) | en | <b>0.919</b> | <b>0.829</b> | 65 | [atis-nmt.ipynb](examples/atis-nmt.ipynb)
-| [Conll-2003](https://github.com/kyzhouhzau/BERT-NER/tree/master/NERdata) | en | 0.936 | <b>0.900</b> | 5 | [conll-2003-nmt.ipynb](examples/conll-2003-nmt.ipynb)
-
-### Joint Models
-#### Model: `BertBiLSTMAttnCRFJoint`
-
-| Dataset | Lang | IOB precision | Span precision | Clf precision | Total spans in test set | Total classes | Notebook
-|-|-|-|-|-|-|-|-|
-| [Atis](https://github.com/Microsoft/CNTK/tree/master/Examples/LanguageUnderstanding/ATIS/Data) | en | 0.877 | 0.824 | 0.894 | 65 | 17 | [atis-joint.ipynb](examples/atis-joint.ipynb)
-
-#### Model: `BertBiLSTMAttnNMTJoint`
-
-| Dataset | Lang | IOB precision | Span precision | Clf precision | Total spans in test set | Total classes | Notebook
-|-|-|-|-|-|-|-|-|
-| [Atis](https://github.com/Microsoft/CNTK/tree/master/Examples/LanguageUnderstanding/ATIS/Data) | en | 0.913 | 0.820 | 0.888 | 65 | 17 | [atis-joint-nmt.ipynb](examples/atis-joint-nmt.ipynb)
-
-### Comprasion with ELMo model
-We tested `BertBiLSTMCRF`, `BertBiLSTMAttnCRF` and `BertBiLSTMAttnNMT` on russian dataset [FactRuEval](https://github.com/dialogue-evaluation/factRuEval-2016) with freezed `ElmoEmbedder`:
-
-#### Model `BertBiLSTMCRF`:
-
-| Dataset | Lang | IOB precision | Span precision | Total spans in test set | Notebook
-|-|-|-|-|-|-|
-| [FactRuEval](https://github.com/dialogue-evaluation/factRuEval-2016) | ru | 0.903 | 0.851 | 4 | [samples.ipynb](examples_elmo/samples.ipynb)
-
-#### Model `BertBiLSTMAttnCRF`:
-
-| Dataset | Lang | IOB precision | Span precision | Total spans in test set | Notebook
-|-|-|-|-|-|-|
-| [FactRuEval](https://github.com/dialogue-evaluation/factRuEval-2016) | ru | 0.899 | 0.819 | 4 | [factrueval.ipynb](examples_elmo/factrueval.ipynb)
-
-#### Model `BertBiLSTMAttnNMT`:
-
-| Dataset | Lang | IOB precision | Span precision | Total spans in test set | Notebook
-|-|-|-|-|-|-|
-| [FactRuEval](https://github.com/dialogue-evaluation/factRuEval-2016) | ru | 0.902 | 0.752 | 4 | [factrueval-nmt.ipynb](examples_elmo/factrueval.ipynb)
-
-
-## 3. Installation, requirements, test
-
-This code was tested on Python 3.5+. The requirements are:
+This code was tested on Python 3.6. The requirements are:
 
 - PyTorch (>= 0.4.1)
 - tqdm
@@ -105,53 +40,49 @@ To install the dependencies:
 pip install -r ./requirements.txt
 ````
 
-## PyTorch neural network models
+## 3. Usage
+Solution located in notebook [AGRR-2019-full.ipynb](exps/AGRR-2019-full.ipynb).
+There are two solutions:
+1. model trained only on train set;
+2. model trained on train and dev set.
 
-All models are organized as `Encoder`-`Decoder`. `Encoder` is a freezed and <i>weighted</i> (as proposed in [elmo](https://allennlp.org/elmo)) bert output from 12 layers. There are three models that is obtained by using different `Decoder`.
+You should run the first cell in notebook before all.
 
-`Encoder`: BertBiLSTM
+### 3.1 Data preparation
+For train models you should run section `0. Parse data` in notebook.
+### 3.2 Learn model on train data
+In section  you should specify your own paths:
+* train_path - path to train.csv file;
+* valid_path - path to valid.csv file;
+* vocab_file - path to google bert pretrained vocab;
+* bert_config_file - path to google bert pretrained config;
+* init_checkpoint_pt - path to google bert pretrained weights.
 
-1. `BertBiLSTMCRF`: `Encoder` + `Decoder` (BiLSTM + CRF)
-2. `BertBiLSTMAttnCRF`: `Encoder` + `Decoder` (BiLSTM + MultiHead Attention + CRF)
-3. `BertBiLSTMAttnNMT`: `Encoder` + `Decoder` (LSTM + Bahdanau Attention - NMT Decode)
-4. `BertBiLSTMAttnCRFJoint`: `Encoder` + `Decoder` (BiLSTM + MultiHead Attention + CRF) + (PoolingLinearClassifier - for classification) - joint model with classification.
-5. `BertBiLSTMAttnNMTJoint`: `Encoder` + `Decoder` (LSTM + Bahdanau Attention - NMT Decode) + (LinearClassifier - for classification) - joint model with classification.
+After that run section `1. Create dataloaders` with changed paths.
 
+Run section `2. Create model`.
 
-## Usage
+Before run section `3. Create learner` you should specify argument `best_model_path` (as your own path).
 
-### 1. Loading data:
+Run section `4. Learn your NER model`.
 
-```from modules.bert_data import BertNerData as NerData```
+For get results on dev set run sections `5. Evaluate` and `6. To needle format` (don't forget change paths for dev dataset and parsed dev dataset).
 
-```data = NerData.create(train_path, valid_path, vocab_file)```
+I obtained the following results by your script:
 
-### 2. Create model:
+```Binary classification quality (f1-score): 0.9583778014941302```
+```Gapping resolution quality (symbol-wise f-measure): 0.9576077060524616```
 
-```from modules.bert_models import BertBiLSTMCRF```
+### 3.3 Make prediction for model trained only on train set
+Run section `6. To needle format` (if didn't run on prev step).
 
-```model = BertBiLSTMCRF.create(len(data.label2idx), bert_config_file, init_checkpoint_pt, enc_hidden_dim=256)```
+For get test predictions run section `7. Make prediction` (don't forget change paths for dev dataset and parsed dev dataset).
 
-### 3. Create learner:
+### 3.4 Make prediction for model trained on train and dev set
+Run section `8. Merge train and dev` (don't forget change paths for dev dataset and parsed dev dataset).
 
-```from modules.train import NerLearner```
+Run sections `9. Train full`, `9.2. Create model`, `9.3. Create learner` (don't forget change paths for dev dataset and parsed dev dataset).
 
-```learner = NerLearner(model, data, best_model_path="/datadrive/models/factrueval/exp_final.cpt", lr=0.01, clip=1.0, sup_labels=data.id2label[5:], t_total=num_epochs * len(data.train_dl))```
+After that call only one (you can call all cells) cell with code `learner.fit(num_epochs, target_metric='f1')`.
 
-### 4. Learn your NER model:
-
-```learner.fit(2, target_metric='prec')```
-
-### 5. Predict on new data:
-
-```from modules.data.bert_data import get_bert_data_loader_for_predict```
-
-```dl = get_bert_data_loader_for_predict(data_path + "valid.csv", learner)```
-
-```learner.load_model(best_model_path)```
-
-```preds = learner.predict(dl)```
-
-
-* For more detailed instructions of using BERT model see [samples.ipynb](examples/samples.ipynb).
-* For more detailed instructions of using ELMo model see [samples.ipynb](examples_elmo/samples.ipynb).
+For get test prediction on  run section `9.5 Make prediction with model trained on full data` (don't forget change paths for dev dataset and parsed dev dataset).
