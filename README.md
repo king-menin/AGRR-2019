@@ -1,6 +1,9 @@
 # Solution of AGRR-2019 (full annotation task)
 # Instructions
 
+## 0. Refer to:
+[nert-bert](https://github.com/sberbank-ai/ner-bert)
+
 ## 1. Loading a TensorFlow checkpoint (e.g. [Google's pre-trained models](https://github.com/google-research/bert#pre-trained-models))
 
 You can convert any TensorFlow checkpoint for BERT (in particular [the pre-trained models released by Google](https://github.com/google-research/bert#pre-trained-models)) in a PyTorch save file by using the [`convert_tf_checkpoint_to_pytorch.py`](convert_tf_checkpoint_to_pytorch.py) script.
