@@ -1,4 +1,4 @@
-# Solution of AGRR-2019 (full annotation task)
+# The second place solution of AGRR-2019 (full annotation task)
 # Instructions
 
 ## 0. Refer to:
