@@ -300,7 +300,8 @@ class BertBiLSTMAttnNMTJoint(NerModel):
                # Global params
                use_cuda=True,
                # Meta
-               meta_dim=None):
+               meta_dim=None, nbest=12):
+        torch.cuda.set_device(5)
         embedder = BertEmbedder.create(
             bert_config_file, init_checkpoint_pt, embedding_dim, use_cuda, bert_mode, freeze)
         if meta_dim is None:
@@ -309,7 +310,7 @@ class BertBiLSTMAttnNMTJoint(NerModel):
             encoder = BertMetaBiLSTMEncoder.create(embedder, meta_dim, enc_hidden_dim, rnn_layers, use_cuda)
         decoder = NMTJointDecoder.create(
             label_size, intent_size, dec_embedding_dim, dec_hidden_dim,
-            dec_rnn_layers, input_dropout, pad_idx, use_cuda)
+            dec_rnn_layers, input_dropout, pad_idx, use_cuda, nbest=nbest)
         return cls(encoder, decoder, use_cuda)
 
 

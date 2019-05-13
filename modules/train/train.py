@@ -20,7 +20,10 @@ def train_step(dl, model, optimizer, lr_scheduler=None, clip=None, num_epoch=1):
     for batch in pr:
         idx += 1
         model.zero_grad()
-        loss = model.score(batch)
+        try:
+            loss = model.score(batch)
+        except AttributeError:
+            loss = model.module.score(batch)
         loss.backward()
         if clip is not None:
             _ = torch.nn.utils.clip_grad_norm(model.parameters(), clip)
@@ -31,7 +34,7 @@ def train_step(dl, model, optimizer, lr_scheduler=None, clip=None, num_epoch=1):
         pr.set_description("train loss: {}".format(epoch_loss / idx))
         if lr_scheduler is not None:
             lr_scheduler.step()
-        # torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
     if lr_scheduler is not None:
         logging.info("\nlr after epoch: {}".format(lr_scheduler.lr))
     logging.info("\nepoch {}, average train epoch loss={:.5}\n".format(
@@ -90,7 +93,7 @@ def validate_step(dl, model, id2label, sup_labels, id2cls=None):
     for batch in tqdm(dl, total=len(dl), leave=False):
         idx += 1
         labels_mask, labels_ids = batch[-2:]
-        preds = model.forward(batch)
+        preds = model(batch)
         if id2cls is not None:
             preds, preds_cls = preds
             preds_cpu_, targets_cpu_ = transformed_result_cls([preds_cls], [batch[-3]], id2cls)
@@ -115,21 +118,26 @@ def predict(dl, model, id2label, id2cls=None):
         idx += 1
         labels_mask, labels_ids = batch[-2:]
         preds = model.forward(batch)
+        bs = batch[0].shape[0]
         if id2cls is not None:
             preds, preds_cls = preds
+            unsorted_pred = [0] * bs
+            for idx, sidx in enumerate(sorted_idx):
+                unsorted_pred[sidx] = preds_cls[idx]
+            preds_cls = unsorted_pred
             preds_cpu_ = transformed_result_cls([preds_cls], [preds_cls], id2cls, False)
             preds_cpu_cls.extend(preds_cpu_)
-        bs = batch[0].shape[0]
         unsorted_mask = [0] * bs
         unsorted_pred = [0] * bs
         for idx, sidx in enumerate(sorted_idx):
             unsorted_pred[sidx] = preds[idx]
             unsorted_mask[sidx] = labels_mask[idx]
-        
         preds_cpu_ = transformed_result([unsorted_pred], [unsorted_mask], id2label)
+        # print(len(preds_cpu_))
         preds_cpu.extend(preds_cpu_)
     if id2cls is not None:
         return preds_cpu, preds_cpu_cls
+    print(preds_cpu)
     return preds_cpu
 
 

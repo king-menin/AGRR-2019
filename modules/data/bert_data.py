@@ -171,18 +171,17 @@ def get_data(
         bert_labels = []
         bert_tokens.append("[CLS]")
         bert_labels.append("[CLS]")
+
         orig_tokens = []
-        text = text.replace('\x97', "unk")
-        text = text.replace('\uf076', "unk")
-        text = text.replace("\ue405", "unk")
-        text = text.replace("\ue105", "unk")
-        text = text.replace("\ue415", "unk")
-        text = text.replace('\x07', "unk")
-        orig_tokens.extend(str(text).split())
-        labels = str(labels).split()
+        res_labels = []
+        for tok, lbl in zip(str(text).split(), str(labels).split()):
+            if tok not in ['\u200b', '\x07', "\ue105", '\x97', '\uf076', "\ue405", "\uf02d", "\ue105\ue415"]:
+                orig_tokens.append(tok)
+                res_labels.append(lbl)
+        labels = res_labels
         pad_idx = label2idx[pad]
         assert len(orig_tokens) == len(labels)
-        # prev_label = ""
+        prev_label = ""
         for idx_, (orig_token, label) in enumerate(zip(orig_tokens, labels)):
             # Fix BIO to IO as BERT proposed https://arxiv.org/pdf/1810.04805.pdf
             prefix = "B_"

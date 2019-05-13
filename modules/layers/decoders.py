@@ -367,7 +367,7 @@ class PoolingLinearClassifier(nn.Module):
         sl, bs, _ = output.size()
         avgpool = self.pool(output, bs, False)
         mxpool = self.pool(output, bs, True)
-        x = torch.cat([output[-1], mxpool, avgpool], 1)
+        x = torch.cat([output[0], mxpool, avgpool], 1)
         return self.linear(x)
 
 
@@ -425,9 +425,11 @@ class NMTJointDecoder(nn.Module):
     def __init__(self,
                  label_size, intent_size,
                  embedding_dim=64, hidden_dim=256, rnn_layers=1,
-                 dropout_p=0.1, pad_idx=0, use_cuda=True):
+                 dropout_p=0.1, pad_idx=0, use_cuda=True, nbest=7):
         super(NMTJointDecoder, self).__init__()
-        self.slot_size = label_size
+        self.nbest = nbest
+        self.crf = NCRF(label_size, use_cuda)
+        self.slot_size = label_size + 2
         self.intent_size = intent_size
         self.pad_idx = pad_idx
         self.embedding_dim = embedding_dim
@@ -441,8 +443,7 @@ class NMTJointDecoder(nn.Module):
         self.attn = nn.Linear(self.hidden_dim, self.hidden_dim)
         self.slot_out = nn.Linear(self.hidden_dim * 2, self.slot_size)
 
-        self.loss = nn.CrossEntropyLoss(ignore_index=pad_idx)
-
+        # self.loss = nn.CrossEntropyLoss(ignore_index=pad_idx)
         self.intent_loss = nn.CrossEntropyLoss()
         self.intent_out = Linears(
             in_features=self.hidden_dim * 2,
@@ -531,7 +532,7 @@ class NMTJointDecoder(nn.Module):
             concated = torch.cat((hidden[0], context.transpose(0, 1)), 2)
             score = self.slot_out(concated.squeeze(0))
             softmaxed = functional.log_softmax(score)
-            decode.append(softmaxed)
+            decode.append(score)
             _, input = torch.max(softmaxed, 1)
             embedded = self.embedding(input.unsqueeze(1))
 
@@ -541,22 +542,23 @@ class NMTJointDecoder(nn.Module):
         return slot_scores.view(batch_size, length, -1), intent_score
 
     def forward(self, encoder_outputs, input_mask):
-        scores, intent_score = self.forward_model(encoder_outputs, input_mask)
-        return scores.argmax(-1), intent_score.argmax(-1)
+        logits, intent_score = self.forward_model(encoder_outputs, input_mask)
+        _, preds = self.crf._viterbi_decode_nbest(logits, input_mask, self.nbest)
+        # print(preds.shape)
+        preds = preds[:, :, 0]
+        return preds, intent_score.argmax(-1)
 
     def score(self, encoder_outputs, input_mask, labels_ids, cls_ids):
-        scores, intent_score = self.forward_model(encoder_outputs, input_mask)
-        batch_size = encoder_outputs.shape[0]
-        len_ = encoder_outputs.shape[1]
-        return self.loss(scores.view(batch_size * len_, -1), labels_ids.view(-1)) + self.intent_loss(
-            intent_score, cls_ids)
+        logits, intent_score = self.forward_model(encoder_outputs, input_mask)
+        crf_score = self.crf.neg_log_likelihood_loss(logits, input_mask, labels_ids) / logits.size(0)
+        return crf_score + self.intent_loss(intent_score, cls_ids)
 
     @classmethod
     def create(cls, label_size, intent_size,
-               embedding_dim=64, hidden_dim=256, rnn_layers=1, dropout_p=0.1, pad_idx=0, use_cuda=True):
+               embedding_dim=64, hidden_dim=256, rnn_layers=1, dropout_p=0.1, pad_idx=0, use_cuda=True, nbest=7):
         return cls(label_size=label_size, intent_size=intent_size,
                    embedding_dim=embedding_dim, hidden_dim=hidden_dim,
-                   rnn_layers=rnn_layers, dropout_p=dropout_p, pad_idx=pad_idx, use_cuda=use_cuda)
+                   rnn_layers=rnn_layers, dropout_p=dropout_p, pad_idx=pad_idx, use_cuda=use_cuda, nbest=nbest)
 
 
 class AttnNCRFJointDecoder(nn.Module):
