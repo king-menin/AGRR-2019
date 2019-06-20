@@ -137,7 +137,7 @@ def predict(dl, model, id2label, id2cls=None):
         preds_cpu.extend(preds_cpu_)
     if id2cls is not None:
         return preds_cpu, preds_cpu_cls
-    print(preds_cpu)
+    # print(preds_cpu)
     return preds_cpu
 
 
@@ -266,4 +266,4 @@ class NerLearner(object):
     
     def load_model(self, path=None):
         path = path if path else self.best_model_path
-        self.model.load_state_dict(torch.load(path))
+        self.model.load_state_dict(torch.load(path, map_location="cuda:0"))

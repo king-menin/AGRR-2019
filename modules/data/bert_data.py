@@ -133,6 +133,8 @@ class DataLoaderForPredict(DataLoader):
 def get_data(
         df, tokenizer, label2idx=None, max_seq_len=424, pad="<pad>", cls2idx=None,
         is_cls=False, is_meta=False):
+    # from pytorch_pretrained_bert import BertTokenizer
+    # tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
     tqdm_notebook = tqdm
     if label2idx is None:
         label2idx = {pad: 0, '[CLS]': 1}

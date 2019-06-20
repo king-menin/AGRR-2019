@@ -3,6 +3,10 @@ from collections import Counter
 import numpy as np
 
 
+def if_none(own, other):
+    return own if own is not None else other
+
+
 def ipython_info():
     return hasattr(main, '__file__')
 

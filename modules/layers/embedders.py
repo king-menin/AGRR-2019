@@ -6,6 +6,7 @@ import codecs
 import logging
 import json
 from torch import nn
+from pytorch_pretrained_bert import BertTokenizer, BertModel
 
 
 # TODO: add from_config to other embedders
@@ -98,16 +99,12 @@ class BertEmbedder(nn.Module):
     def create(cls,
                bert_config_file, init_checkpoint_pt, embedding_dim=768, use_cuda=True, bert_mode="weighted",
                freeze=True):
-        bert_config = bert_modeling.BertConfig.from_json_file(bert_config_file)
-        model = bert_modeling.BertModel(bert_config)
+        # model = BertModel.from_pretrained('bert-base-multilingual-cased')
+        model = BertModel.from_pretrained('bert-base-multilingual-cased')
         if use_cuda:
-            device = torch.device("cuda")
-            map_location = "cuda:4"
-        else:
-            map_location = "cpu"
-            device = torch.device("cpu")
-        model.load_state_dict(torch.load(init_checkpoint_pt, map_location=map_location))
-        model = model.to(device)
+            model.to('cuda:0')
+        # model.load_state_dict(torch.load(init_checkpoint_pt, map_location=map_location))
+        # model = model.to(device)
         model = cls(model=model, embedding_dim=embedding_dim, use_cuda=use_cuda, bert_mode=bert_mode,
                     bert_config_file=bert_config_file, init_checkpoint_pt=init_checkpoint_pt, freeze=freeze)
         if freeze:
