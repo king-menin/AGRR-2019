@@ -133,8 +133,6 @@ class DataLoaderForPredict(DataLoader):
 def get_data(
         df, tokenizer, label2idx=None, max_seq_len=424, pad="<pad>", cls2idx=None,
         is_cls=False, is_meta=False):
-    # from pytorch_pretrained_bert import BertTokenizer
-    # tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
     tqdm_notebook = tqdm
     if label2idx is None:
         label2idx = {pad: 0, '[CLS]': 1}
@@ -149,7 +147,7 @@ def get_data(
         all_args.extend([df["1"].tolist(), df["0"].tolist()])
     if is_meta:
         all_args.append(df["3"].tolist())
-    total = len(df["0"].tolist())
+    total = len(df["1"].tolist())
     cls = None
     meta = None
     for args in tqdm_notebook(enumerate(zip(*all_args)), total=total, leave=False):
@@ -274,10 +272,13 @@ def get_data(
 
 def get_bert_data_loaders(train, valid, vocab_file, batch_size=16, cuda=True, is_cls=False,
                           do_lower_case=False, max_seq_len=424, is_meta=False, label2idx=None, cls2idx=None):
-    train = pd.read_csv(train)
-    valid = pd.read_csv(valid)
-
-    tokenizer = tokenization.FullTokenizer(vocab_file=vocab_file, do_lower_case=do_lower_case)
+    
+    train = pd.read_csv(train, sep="\t")
+    valid = pd.read_csv(valid, sep="\t")
+    from pytorch_pretrained_bert import BertTokenizer
+    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+    
+    # tokenizer = tokenization.FullTokenizer(vocab_file=vocab_file, do_lower_case=do_lower_case)
     train_f, label2idx = get_data(
         train, tokenizer, label2idx, cls2idx=cls2idx, is_cls=is_cls, max_seq_len=max_seq_len, is_meta=is_meta)
     if is_cls:
@@ -296,7 +297,7 @@ def get_bert_data_loaders(train, valid, vocab_file, batch_size=16, cuda=True, is
 
 
 def get_bert_data_loader_for_predict(path, learner):
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, sep="\t")
     f, _ = get_data(df, tokenizer=learner.data.tokenizer,
                     label2idx=learner.data.label2idx, cls2idx=learner.data.cls2idx,
                     is_cls=learner.data.is_cls,
