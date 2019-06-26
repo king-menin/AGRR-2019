@@ -1,6 +1,8 @@
 # The second place solution of AGRR-2019 (full annotation task)
 # Instructions
 
+Paper: http://www.dialog-21.ru/media/4643/_-dialog2019scopus.pdf
+
 ## 0. Refer to:
 [nert-bert](https://github.com/sberbank-ai/ner-bert)
 
